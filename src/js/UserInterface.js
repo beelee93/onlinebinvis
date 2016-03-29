@@ -58,3 +58,11 @@ UserInterface.relayout = function () {
         this.panels[i].relayout();
     }
 }
+
+
+UserInterface.onkeypress = function (evt) {
+    // pass arguments down to each panel
+    for (var i = 0; i < UserInterface.panels.length; i++) {
+        UserInterface.panels[i].onkeypress(evt);
+    }
+}

@@ -47,3 +47,11 @@ ImageBuffer.prototype.dispose = function () {
     delete this.canvas;
     delete this.imgData;
 }
+
+ImageBuffer.prototype.getWidth = function () {
+    return this.imgData.width;
+}
+
+ImageBuffer.prototype.getHeight = function () {
+    return this.imgData.height;
+}

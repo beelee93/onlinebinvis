@@ -12,6 +12,10 @@ function BytemapPanel(parent) {
     // create buffer
     this.imageBuffer = new ImageBuffer(parent.context, 512, 512, "bytemap-panel");
 
+    this.pixelFormat = Globals.PF8BPP;
+    this.pixelFormatAlpha = 0;
+    this.pixelFormatText = "8 bpp";
+
     this.redraw = 1;
 }
 
@@ -27,26 +31,137 @@ BytemapPanel.prototype.setScanWidth = function (newScanWidth) {
 }
 
 BytemapPanel.prototype.update = function (diffTime) {
-
+    if (this.pixelFormatAlpha > 0) {
+        this.pixelFormatAlpha -= diffTime;
+    }
 }
 
 BytemapPanel.prototype.updateData = function () {
     // draw data from FileBuffer data
     this.imageBuffer.clearBuffer();
     if (FileBuffer.data) {
-        var i;
+        var i, x, y, temp, centering;
+        var fb = FileBuffer.data;
         var stop = false;
-        for (var y = 0; y < this.size.height && !stop; y++) {
-            for (var x = 0; x < this.scanwidth; x++) {
-                i = y * this.scanwidth + x;
-                if (BinVis.dataOffset + i >= BinVis.dataLength) {
-                    stop = true;
-                    break;
+
+        centering = Math.floor(( this.imageBuffer.getWidth() - this.scanwidth ) / 2);
+        switch (this.pixelFormat) {
+            case Globals.PF8BPP:
+                for (y = 0; y < this.size.height && !stop; y++) {
+                    for (x = 0; x < this.scanwidth; x++) {
+                        i = y * this.scanwidth + x;
+                        if (BinVis.dataOffset + i >= BinVis.dataLength) {
+                            stop = true;
+                            break;
+                        }
+                        this.imageBuffer.setPixel(centering + x, y, 0, fb[BinVis.dataOffset + i], 0);
+                    }
                 }
-                this.imageBuffer.setPixel(x, y, 0, FileBuffer.data[BinVis.dataOffset + i], 0);
-            }
+                break;
+
+            case Globals.PF16BPP:
+                for (y = 0; y < this.size.height && !stop; y++) {
+                    for (x = 0; x < this.scanwidth; x++) {
+                        i = (y * this.scanwidth + x) * 2 + BinVis.dataOffset;
+                        if (i >= BinVis.dataLength - 1) {
+                            stop = true;
+                            break;
+                        }
+
+                        // get green
+                        temp = (fb[i] & 0x7) << 3;
+                        temp |= (fb[i + 1] & 0xE0) >> 5;
+                        temp = temp * 255 / 63;
+
+                        this.imageBuffer.setPixel(centering + x, y, ((fb[i] & 0xF8) >> 3) * 255 / 31, temp,
+                                                         (fb[i + 1] & 0x1F) * 255 / 31);
+                    }
+                }
+                break;
+
+            case Globals.PF24BPP_RGB:
+                for (y = 0; y < this.size.height && !stop; y++) {
+                    for (x = 0; x < this.scanwidth; x++) {
+                        i = (y * this.scanwidth + x) * 3 + BinVis.dataOffset;
+                        if (i >= BinVis.dataLength - 2) {
+                            stop = true;
+                            break;
+                        }
+                        this.imageBuffer.setPixel(centering + x, y, fb[i], fb[i + 1], fb[i + 2]);
+                    }
+                }
+                break;
+
+            case Globals.PF24BPP_BGR:
+                for (y = 0; y < this.size.height && !stop; y++) {
+                    for (x = 0; x < this.scanwidth; x++) {
+                        i = (y * this.scanwidth + x) * 3 + BinVis.dataOffset;
+                        if (i >= BinVis.dataLength - 2) {
+                            stop = true;
+                            break;
+                        }
+                        this.imageBuffer.setPixel(centering + x, y, fb[i + 2], fb[i + 1], fb[i]);
+                    }
+                }
+                break;
+
+            case Globals.PF32BPP_ARGB:
+                for (y = 0; y < this.size.height && !stop; y++) {
+                    for (x = 0; x < this.scanwidth; x++) {
+                        i = (y * this.scanwidth + x) * 4 + BinVis.dataOffset;
+                        if (i >= BinVis.dataLength - 3) {
+                            stop = true;
+                            break;
+                        }
+                        temp = fb[i] / 255;
+                        this.imageBuffer.setPixel(centering + x, y, fb[i + 1] * temp, fb[i + 2] * temp, fb[i + 3] * temp);
+                    }
+                }
+                break;
+
+            case Globals.PF32BPP_BGRA:
+                for (y = 0; y < this.size.height && !stop; y++) {
+                    for (x = 0; x < this.scanwidth; x++) {
+                        i = (y * this.scanwidth + x) * 4 + BinVis.dataOffset;
+                        if (i >= BinVis.dataLength - 3) {
+                            stop = true;
+                            break;
+                        }
+                        temp = fb[i + 3] / 255;
+                        this.imageBuffer.setPixel(centering + x, y, fb[i + 3] * temp, fb[i + 2] * temp, fb[i + 1] * temp);
+                    }
+                }
+                break;
         }
+
         this.redraw = 1;
+    }
+}
+
+BytemapPanel.prototype.setPixelFormatText = function () {
+    switch (this.pixelFormat) {
+        case Globals.PF8BPP:
+            this.pixelFormatText = "8 bpp";
+            break;
+        case Globals.PF16BPP:
+            this.pixelFormatText = "16 bpp";
+            break;
+
+        case Globals.PF24BPP_RGB:
+            this.pixelFormatText = "24 bpp RGB";
+            break;
+
+        case Globals.PF24BPP_BGR:
+            this.pixelFormatText = "24 bpp BGR";
+            break;
+
+        case Globals.PF32BPP_ARGB:
+            this.pixelFormatText = "32 bpp ARGB";
+            break;
+
+        case Globals.PF32BPP_BGRA:
+            this.pixelFormatText = "32 bpp BGRA";
+            break;
     }
 }
 
@@ -58,4 +173,45 @@ BytemapPanel.prototype.render = function (ctx, diffTime) {
     }
 
     ctx.drawImage(this.imageBuffer.getCanvas(), 0, 0);
+    if (this.pixelFormatAlpha > 0) {
+        ctx.fillStyle = "yellow";
+        ctx.strokeStyle = "white";
+        ctx.globalAlpha = Math.min(this.pixelFormatAlpha, 1);
+        ctx.font = "32px monospace bolder";
+        ctx.textBaseline = "top";
+ 
+        ctx.fillText(this.pixelFormatText, 10, 10);
+        ctx.strokeText(this.pixelFormatText, 10, 10);
+
+        ctx.globalAlpha = 1;
+    }
+}
+
+BytemapPanel.prototype.onkeypress = function (evt) {
+    switch (evt.key) {
+        case 'p': // P - cycle pixel formats
+            this.pixelFormat++;
+            if (this.pixelFormat >= Globals.SupportedPixelFormatCount)
+                this.pixelFormat -= Globals.SupportedPixelFormatCount;
+
+            this.setPixelFormatText();
+            this.pixelFormatAlpha = 2;
+            this.updateData();
+            break;
+
+        case 'a':
+            if (evt.ctrlKey)
+                this.setScanWidth(this.scanwidth - 10);
+            else
+                this.setScanWidth(this.scanwidth - 1);
+            evt.preventDefault();
+            break;
+        case 'd':
+            if (evt.ctrlKey)
+                this.setScanWidth(this.scanwidth + 10);
+            else
+                this.setScanWidth(this.scanwidth + 1);
+            evt.preventDefault();
+            break;
+    }
 }

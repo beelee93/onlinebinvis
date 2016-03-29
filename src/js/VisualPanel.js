@@ -29,6 +29,7 @@ VisualPanel.prototype.anchor = Globals.ANCHOR_NONE;
 VisualPanel.prototype.name = "UserControl";
 VisualPanel.prototype.parent = null;
 VisualPanel.prototype.renderEnabled = false;
+VisualPanel.prototype.onkeypress = function (evt) { }; // nothing to do
 
 ///////////////////////////////////////////////////////////////////
 // Assigns this panel to a UserInterface

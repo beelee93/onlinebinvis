@@ -13,28 +13,37 @@
         <script src="js/BytemapPanel.js"></script>
         <script src="js/FileBuffer.js"></script>
         <script>
-            jQuery.noConflict();
-            
+
             function init() {
                 BinVis.initialize(); // initialize app
-                document.getElementById("upload-file").onchange = fileSelectedEvent;
 
-                document.getElementById("offset-slider").onchange = offset_slider_changed;
-                document.getElementById("offset-text").onkeypress = offset_text_enter;
+                // event handler for file uploader
+                $("#upload-file").change(fileSelectedEvent);
+
+                // setup event handlers for offset configurator
+                $("#offset-slider").change(offset_slider_changed);
+
+                // event handler for keypresses
+                $("body").keypress(handle_keypresses);
             }
 
+            // when a new file is selected
             function fileSelectedEvent() {
                 console.log("File selected");
-                BinVis.loadFile(document.getElementById("upload-file").files[0]);
-                document.getElementById("offset-slider").max = (BinVis.dataLength - 1).toString();
-                document.getElementById("offset-slider").value = "0";
+
+                BinVis.loadFile($("#upload-file")[0].files[0]);
+                var o = $("#offset-slider")[0];
+                o.max = (BinVis.dataLength - 1).toString();
+                o.value = "0";
                 offset_slider_changed();
             }
 
+            // when the button for upload is clicked
             function uploadInvoke() {
                 document.getElementById("upload-file").click();
             }
 
+            // when offset slider is changed
             function offset_slider_changed() {
                 document.getElementById("offset-text").value = document.getElementById("offset-slider").value;
                 var a = document.getElementById("offset-slider").value;
@@ -42,22 +51,81 @@
                 BinVis.setDataOffset(val);
             }
 
-            function offset_text_enter(evt) {
-                if (evt.keyCode == 13) // ENTER
-                {
-                    var a = document.getElementById("offset-text").value;
-                    var val = parseInt(a, 10);
-                    if (val == NaN) {
-                        document.getElementById("offset-text").value = document.getElementById("offset-slider").value;
+            // handles keypresses globally
+            function handle_keypresses(evt) {
+
+                if (!FileBuffer.file || BinVis.fileLoadingPhase != Globals.FILE_LOADED)
+                    return 0;
+
+                var handled = false;
+                switch (evt.target.id) {
+
+                    case "offset-text": // offset textbox
+                        if (evt.keyCode == 13) // ENTER
+                        {
+                            var a = document.getElementById("offset-text").value;
+                            var val = parseInt(a, 10);
+                            if (val == NaN) {
+                                document.getElementById("offset-text").value = document.getElementById("offset-slider").value;
+                            }
+                            else {
+                                if (val < 0) val = 0;
+                                if (val >= BinVis.dataLength) val = BinVis.dataLength - 1;
+                                document.getElementById("offset-slider").value = val.toString();
+                                offset_slider_changed();
+                            }
+                        }
+                        handled = true;
+                        break;
+
+                    case "offset-slider": // offset slider
+                        offset_slider_changed();
+                        handled = true;
+                        break;
+                }
+
+                if (!handled) {
+                    // keypress directed to document body
+
+                    var o = $("#offset-slider")[0];
+                    var curVal = parseInt(o.value);
+
+                    switch (evt.keyCode) {
+                        case 37: // Arrow left
+                            evt.preventDefault();
+                            break;
+                        case 38: // Arrow up
+                            curVal -= (evt.ctrlKey ? 10 : 1);
+                            evt.preventDefault();
+                            break;
+
+                        case 39: // Arrow right
+                            evt.preventDefault();
+                            break;
+                        case 40: // Arrow down
+                            curVal += (evt.ctrlKey ? 10 : 1);
+                            evt.preventDefault();
+                            break;
+
+                        default:
+                            // pass key args to user interface
+                            if (UserInterface.onkeypress)
+                                UserInterface.onkeypress(evt);
+                            break;
                     }
-                    else {
-                        if (val < 0) val = 0;
-                        if (val >= BinVis.dataLength) val = BinVis.dataLength - 1;
-                        document.getElementById("offset-slider").value = val.toString();
+
+                    // clamp
+                    if (curVal < 0) curVal = 0;
+                    if (curVal > BinVis.dataLength - 1) curVal = BinVis.dataLength - 1;
+
+                    if (curVal.toString() != o.value) {
+                        o.value = curVal.toString();
                         offset_slider_changed();
                     }
                 }
+
             }
+
         </script>
 
         <link type="text/css" rel="stylesheet" href="css/main.css" />
@@ -66,10 +134,16 @@
         <div id="main-container">
             <div id="header"><h4>Header</h4></div>
             <div id="top-menu" class="hmenu">
+
+                <!-- Upload button -->
                 <a onclick="uploadInvoke()"><img class="button" src="img/uploadicon.png" alt="Upload File" /></a>
-                <span>Offset: </span>
-                <input type="range" id="offset-slider" min="0" max="100" value="0"/>
-                <input type="text" id="offset-text" value="0"/>
+                
+                <!-- Offset configuration -->
+                <span id="offset-slider-container" style="display:none">
+                    <span>Offset: </span>
+                    <input type="range" id="offset-slider" min="0" max="100" value="0"/>
+                    <input type="text" id="offset-text" value="0"/>
+                 </span>
             </div>
             <div id="top-menu-2" class="hmenu">
                 <div id="menu-bytemap">

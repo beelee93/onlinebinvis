@@ -31,6 +31,7 @@ BinVis.initialize = function () {
 // Opens a file for analysis
 ///////////////////////////////////////////////////////////////////
 BinVis.loadFile = function (file) {
+    jQuery("#offset-slider-container").css("display", "none");
     this.resetAllPanels();
 
     if (FileBuffer.file)
@@ -52,6 +53,8 @@ BinVis.loadFileSuccessHandler = function () {
     BinVis.fileLoadingPhase = Globals.FILE_LOADED;
     console.log("FILE FINISHED READING!");
     BinVis.initializePanels();
+
+    jQuery("#offset-slider-container").css("display", "inline");
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -61,6 +64,7 @@ BinVis.loadFileErrorHandler = function () {
     // error reading file
     console.log("ERROR READING!");
     BinVis.fileLoadingPhase = Globals.FILE_NOFILE;
+    jQuery("#offset-slider-container").css("display", "none");
 }
 
 ///////////////////////////////////////////////////////////////////
