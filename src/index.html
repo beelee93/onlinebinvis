@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Test Page</title>
+        <script src="js/jquery.js"></script>
+        <script src="js/Globals.js"></script>
+        <script src="js/ImageBuffer.js"></script>
+        <script src="js/BinVis.js"></script>
+        <script src="js/UserInterface.js"></script>
+        <script src="js/VisualPanel.js"></script>
+        <script src="js/BytemapPanel.js"></script>
+        <script src="js/FileBuffer.js"></script>
+        <script>
+            jQuery.noConflict();
+            
+            function init() {
+                BinVis.initialize(); // initialize app
+                document.getElementById("upload-file").onchange = fileSelectedEvent;
+
+                document.getElementById("offset-slider").onchange = offset_slider_changed;
+                document.getElementById("offset-text").onkeypress = offset_text_enter;
+            }
+
+            function fileSelectedEvent() {
+                console.log("File selected");
+                BinVis.loadFile(document.getElementById("upload-file").files[0]);
+                document.getElementById("offset-slider").max = (BinVis.dataLength - 1).toString();
+                document.getElementById("offset-slider").value = "0";
+                offset_slider_changed();
+            }
+
+            function uploadInvoke() {
+                document.getElementById("upload-file").click();
+            }
+
+            function offset_slider_changed() {
+                document.getElementById("offset-text").value = document.getElementById("offset-slider").value;
+                var a = document.getElementById("offset-slider").value;
+                var val = parseInt(a, 10);
+                BinVis.setDataOffset(val);
+            }
+
+            function offset_text_enter(evt) {
+                if (evt.keyCode == 13) // ENTER
+                {
+                    var a = document.getElementById("offset-text").value;
+                    var val = parseInt(a, 10);
+                    if (val == NaN) {
+                        document.getElementById("offset-text").value = document.getElementById("offset-slider").value;
+                    }
+                    else {
+                        if (val < 0) val = 0;
+                        if (val >= BinVis.dataLength) val = BinVis.dataLength - 1;
+                        document.getElementById("offset-slider").value = val.toString();
+                        offset_slider_changed();
+                    }
+                }
+            }
+        </script>
+
+        <link type="text/css" rel="stylesheet" href="css/main.css" />
+    </head>
+    <body onload="init()">
+        <div id="main-container">
+            <div id="header"><h4>Header</h4></div>
+            <div id="top-menu" class="hmenu">
+                <a onclick="uploadInvoke()"><img class="button" src="img/uploadicon.png" alt="Upload File" /></a>
+                <span>Offset: </span>
+                <input type="range" id="offset-slider" min="0" max="100" value="0"/>
+                <input type="text" id="offset-text" value="0"/>
+            </div>
+            <div id="top-menu-2" class="hmenu">
+                <div id="menu-bytemap">
+                    
+                </div>
+            </div>
+            <div id="main-body">
+                <div id="context-menu"></div>
+                <div id="panel-div">
+                    <div id="visual-panel-canvas">
+                         <canvas id="main-canvas" width="512" height="512"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="buffer-container">
+            <input type="file" id="upload-file" />
+        </div>
+    </body>
+</html>
