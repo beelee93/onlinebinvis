@@ -1,4 +1,4 @@
-function ImageBuffer(canvasContext, width, height, name) {
+function ImageBuffer(width, height, name) {
     this.name = name;
     this.canvas = document.createElement("canvas");
     this.canvas.setAttribute("class", "buffer-canvas");

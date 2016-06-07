@@ -10,7 +10,7 @@ function BytemapPanel(parent) {
     this.scanwidth = 512; // number of bytes displayed in a line
 
     // create buffer
-    this.imageBuffer = new ImageBuffer(parent.context, 512, 512, "bytemap-panel");
+    this.imageBuffer = BinVis.IMG_BUFFER_512;
 
     this.pixelFormat = Globals.PF8BPP;
     this.pixelFormatAlpha = 0;

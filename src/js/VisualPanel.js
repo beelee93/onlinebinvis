@@ -29,6 +29,7 @@ VisualPanel.prototype.anchor = Globals.ANCHOR_NONE;
 VisualPanel.prototype.name = "UserControl";
 VisualPanel.prototype.parent = null;
 VisualPanel.prototype.renderEnabled = false;
+
 VisualPanel.prototype.onkeypress = function (evt) { }; // nothing to do
 
 ///////////////////////////////////////////////////////////////////
@@ -109,3 +110,8 @@ VisualPanel.prototype.update = function (elapsed) { }
 // invoked when the analysis data is changed
 ///////////////////////////////////////////////////////////////////
 VisualPanel.prototype.updateData = function () { }
+
+///////////////////////////////////////////////////////////////////
+// invoked when the system is reset (upon loading new file)
+///////////////////////////////////////////////////////////////////
+VisualPanel.prototype.invokeReset = function() { };

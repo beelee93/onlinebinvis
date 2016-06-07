@@ -2,6 +2,8 @@ var BinVis = {};
 
 // consts
 BinVis.PANEL_BYTEMAP = 0;
+BinVis.PANEL_DIGRAPH = 1;
+BinVis.PANEL_DOTPLOT = 1;
 
 // controls the analysis range
 BinVis.BLOCK_SIZE = 512 * 512;
@@ -12,8 +14,15 @@ BinVis.dataLength = 0;
 // Panels
 BinVis.selectedPanel = null;
 
-BinVis.panelBytemap;
+BinVis.panelBytemap=null;
+BinVis.panelDigraph=null;
+BinVis.panelDotPlot=null;
+
 BinVis.panels = [];
+
+// image buffers
+BinVis.IMG_BUFFER_256 = {};
+BinVis.IMG_BUFFER_512 = {};
 
 ///////////////////////////////////////////////////////////////////
 // Initializes the binvis app
@@ -25,6 +34,9 @@ BinVis.initialize = function () {
     FileBuffer.onerror = this.loadFileErrorHandler;
 
     UserInterface.initialize("main-canvas");
+    
+    BinVis.IMG_BUFFER_256 = new ImageBuffer(256,256,"256x256");
+    BinVis.IMG_BUFFER_512 = new ImageBuffer(512,512,"512x512");
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -84,6 +96,7 @@ BinVis.setDataOffset = function (newOffset) {
 BinVis.resetAllPanels = function () {
     for (var i = 0; i < this.panels.length; i++) {
         this.panels[i].renderEnabled = false;
+        this.panels[i].invokeReset();
     }
 }
 
@@ -110,9 +123,19 @@ BinVis.initializePanels = function () {
         this.panelBytemap = new BytemapPanel(UserInterface);
         this.panels.push(this.panelBytemap); // 0
     }
+    
+    if (!this.panelDigraph) {
+        this.panelDigraph = new DigraphPanel(UserInterface);
+        this.panels.push(this.panelDigraph); // 1
+    }
+    
+    if (!this.panelDotPlot) {
+        this.panelDotPlot = new DotPlotPanel(UserInterface);
+        this.panels.push(this.panelDotPlot); // 2
+    }
 
     // show the default panel
-    this.showPanel(this.PANEL_BYTEMAP);
+    this.showPanel(this.PANEL_DOTPLOT);
 }
 
 ///////////////////////////////////////////////////////////////////

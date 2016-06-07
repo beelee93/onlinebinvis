@@ -11,6 +11,8 @@
         <script src="js/UserInterface.js"></script>
         <script src="js/VisualPanel.js"></script>
         <script src="js/BytemapPanel.js"></script>
+        <script src="js/DigraphPanel.js"></script>
+        <script src="js/DotPlotPanel.js"></script>
         <script src="js/FileBuffer.js"></script>
         <script>
 
@@ -89,13 +91,14 @@
 
                     var o = $("#offset-slider")[0];
                     var curVal = parseInt(o.value);
-
+                    var largeOff = Math.ceil(0.005 * BinVis.dataLength);
+                    
                     switch (evt.keyCode) {
                         case 37: // Arrow left
                             evt.preventDefault();
                             break;
                         case 38: // Arrow up
-                            curVal -= (evt.ctrlKey ? 10 : 1);
+                            curVal -= (evt.ctrlKey ? largeOff : 1);
                             evt.preventDefault();
                             break;
 
@@ -103,7 +106,7 @@
                             evt.preventDefault();
                             break;
                         case 40: // Arrow down
-                            curVal += (evt.ctrlKey ? 10 : 1);
+                            curVal += (evt.ctrlKey ? largeOff : 1);
                             evt.preventDefault();
                             break;
 
