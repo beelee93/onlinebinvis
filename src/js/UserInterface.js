@@ -10,6 +10,10 @@ UserInterface.initialize = function (canvasId) {
 
     // request the frame
     window.requestAnimationFrame(this.requestAnimHandler);
+
+    // mouse event
+    this.canvas.addEventListener("mousedown", this.onMouseDown, false);
+    this.canvas.addEventListener("mousemove", this.onMouseMove, false);
 }
 
 UserInterface.requestAnimHandler = function (timeStamp) {
@@ -66,3 +70,49 @@ UserInterface.onkeypress = function (evt) {
         UserInterface.panels[i].onkeypress(evt);
     }
 }
+
+UserInterface.onMouseDown = function (event) {
+    if (event.target !== UserInterface.canvas) return 0;
+
+    var x, y;
+    if (event.x !== undefined) {
+        x = event.x;
+        y = event.y;
+    }
+    else {
+        x = event.clientX + document.body.scrollLeft +
+              document.documentElement.scrollLeft;
+        y = event.clientY + document.body.scrollTop +
+              document.documentElement.scrollTop;
+    }
+
+    x -= event.target.offsetLeft;
+    y -= event.target.offsetTop;
+    
+    for (var i = 0; i < UserInterface.panels.length; i++) {
+        UserInterface.panels[i].onMouseDown(x, y);
+    }
+};
+
+UserInterface.onMouseMove = function (event) {
+    if (event.target !== UserInterface.canvas) return 0;
+
+    var x, y;
+    if (event.x !== undefined) {
+        x = event.x;
+        y = event.y;
+    }
+    else {
+        x = event.clientX + document.body.scrollLeft +
+              document.documentElement.scrollLeft;
+        y = event.clientY + document.body.scrollTop +
+              document.documentElement.scrollTop;
+    }
+
+    x -= event.target.offsetLeft;
+    y -= event.target.offsetTop;
+
+    for (var i = 0; i < UserInterface.panels.length; i++) {
+        UserInterface.panels[i].onMouseMove(x, y);
+    }
+};

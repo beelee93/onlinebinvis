@@ -31,6 +31,9 @@ VisualPanel.prototype.parent = null;
 VisualPanel.prototype.renderEnabled = false;
 
 VisualPanel.prototype.onkeypress = function (evt) { }; // nothing to do
+VisualPanel.prototype.onMouseDown = function (x,y) { }; 
+VisualPanel.prototype.onMouseMove = function (x,y) { }; 
+
 
 ///////////////////////////////////////////////////////////////////
 // Assigns this panel to a UserInterface

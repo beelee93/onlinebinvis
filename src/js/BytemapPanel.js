@@ -16,6 +16,8 @@ function BytemapPanel(parent) {
     this.pixelFormatAlpha = 0;
     this.pixelFormatText = "8 bpp";
 
+    this.lastMouse = [0, 0, 0, 0,0]; // cx,cy,mappedx,mappedy,offset
+
     this.redraw = 1;
 }
 
@@ -173,13 +175,40 @@ BytemapPanel.prototype.render = function (ctx, diffTime) {
     }
 
     ctx.drawImage(this.imageBuffer.getCanvas(), 0, 0);
+
+    // draw the mouse position - offset indicator
+    if (this.lastMouse[2] >= 0 && this.lastMouse[2] <= (this.size.width + this.scanwidth) / 2) {
+
+        // TODO: Make this text look clearer!!
+        var offX = 20, offY = 32;
+
+        if (this.lastMouse[0] < 400) ctx.textAlign = "left";
+        else { ctx.textAlign = "right"; offX = 0; }
+        if (this.lastMouse[1] < 400) ctx.textBaseLine = "top";
+        else { ctx.textBaseLine = "bottom"; offY = -2; }
+
+        offX = this.lastMouse[0] / UserInterface.canvas.clientWidth * 512 + offX;
+        offY = this.lastMouse[1] / UserInterface.canvas.clientHeight * 512 + offY;
+
+        var txt = this.lastMouse[4].toString();
+
+        ctx.font = "14px monospace bold";
+        ctx.strokeStyle = "black";
+        ctx.strokeText(txt, offX, offY);
+
+        ctx.fillStyle = "white";
+        ctx.fillText(txt, offX, offY);
+    }
+
+    // draw the pixel format notifier
     if (this.pixelFormatAlpha > 0) {
         ctx.fillStyle = "yellow";
         ctx.strokeStyle = "white";
         ctx.globalAlpha = Math.min(this.pixelFormatAlpha, 1);
         ctx.font = "32px monospace bolder";
         ctx.textBaseline = "top";
- 
+				ctx.textAlign = "left";
+
         ctx.fillText(this.pixelFormatText, 10, 10);
         ctx.strokeText(this.pixelFormatText, 10, 10);
 
@@ -205,6 +234,7 @@ BytemapPanel.prototype.onkeypress = function (evt) {
             else
                 this.setScanWidth(this.scanwidth - 1);
             evt.preventDefault();
+            this.onMouseMove(this.lastMouse[0], this.lastMouse[1]);
             break;
         case 'd':
             if (evt.ctrlKey)
@@ -212,6 +242,50 @@ BytemapPanel.prototype.onkeypress = function (evt) {
             else
                 this.setScanWidth(this.scanwidth + 1);
             evt.preventDefault();
+            this.onMouseMove(this.lastMouse[0], this.lastMouse[1]);
             break;
     }
 }
+
+BytemapPanel.prototype.onMouseMove = function (x, y) {
+    this.lastMouse[0] = x;
+    this.lastMouse[1] = y;
+
+    var x0 = (this.size.width - this.scanwidth) / 2;
+
+    this.lastMouse[2] = Math.floor(x / UserInterface.canvas.clientWidth * this.size.width - x0);
+    this.lastMouse[3] = Math.floor(y / UserInterface.canvas.clientHeight * this.size.height);
+
+    // gotta take into account pixel format
+    var mult = 1;
+    switch (this.pixelFormat) {
+        case Globals.PF16BPP:
+            mult = 2;
+            break;
+
+        case Globals.PF24BPP_RGB:
+        case Globals.PF24BPP_BGR:
+            mult = 3;
+            break;
+
+        case Globals.PF32BPP_ARGB:
+        case Globals.PF32BPP_BGRA:
+            mult = 4;
+            break;
+    }
+
+    this.lastMouse[4] = (this.lastMouse[3] * this.scanwidth + this.lastMouse[2]) * mult; + BinVis.dataOffset;
+};
+
+BytemapPanel.prototype.onMouseDown = function (x, y) {
+    this.onMouseMove(x, y);
+		
+		// invoke the Hex Viewer to display current offset
+		
+		// let's align to 9 bits
+		var off = (this.lastMouse[4] & 0xFFFFFE00);
+		BinVis.updateHexViewer(off);
+		
+		// now highlight the corresponding offset
+		BinVis.highlightHex(this.lastMouse[4]);
+};

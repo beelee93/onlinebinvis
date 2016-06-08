@@ -20,6 +20,10 @@ BinVis.panelDotPlot=null;
 
 BinVis.panels = [];
 
+BinVis.hexViewerInitialized = false;
+BinVis.hexViewerHighlight = -1;
+BinVis.hexViewerOffset = -1;
+
 // image buffers
 BinVis.IMG_BUFFER_256 = {};
 BinVis.IMG_BUFFER_512 = {};
@@ -29,14 +33,15 @@ BinVis.IMG_BUFFER_512 = {};
 // id: main-canvas = canvas to draw the UI on
 ///////////////////////////////////////////////////////////////////
 BinVis.initialize = function () {
+    BinVis.initHexViewer();
     FileBuffer.initialize();
     FileBuffer.onsuccess = this.loadFileSuccessHandler;
     FileBuffer.onerror = this.loadFileErrorHandler;
 
     UserInterface.initialize("main-canvas");
-    
-    BinVis.IMG_BUFFER_256 = new ImageBuffer(256,256,"256x256");
-    BinVis.IMG_BUFFER_512 = new ImageBuffer(512,512,"512x512");
+
+    BinVis.IMG_BUFFER_256 = new ImageBuffer(256, 256, "256x256");
+    BinVis.IMG_BUFFER_512 = new ImageBuffer(512, 512, "512x512");
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -67,6 +72,9 @@ BinVis.loadFileSuccessHandler = function () {
     BinVis.initializePanels();
 
     jQuery("#offset-slider-container").css("display", "inline");
+
+    // Hex viewer mechanics
+		BinVis.updateHexViewer(0);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -135,7 +143,7 @@ BinVis.initializePanels = function () {
     }
 
     // show the default panel
-    this.showPanel(this.PANEL_DOTPLOT);
+    this.showPanel(this.PANEL_BYTEMAP);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -143,14 +151,152 @@ BinVis.initializePanels = function () {
 // be routed to this panel
 ///////////////////////////////////////////////////////////////////
 BinVis.showPanel = function (index) {
-    if(this.selectedPanel)
+    if (this.selectedPanel) {
         this.selectedPanel.renderEnabled = false;
+    }
+
+    // flush the UI panels
+    UserInterface.panels.length = 0;
 
     this.selectedPanel = this.panels[index];
     this.selectedPanel.renderEnabled = true;
     this.selectedPanel.updateData();
 
-    // place this panel into UI
+    // place this panel into UI to receive events
     UserInterface.panels = [];
     UserInterface.panels.push(this.selectedPanel);
+};
+
+///////////////////////////////////////////////////////////////////
+// Initialises the hex viewer
+///////////////////////////////////////////////////////////////////
+BinVis.initHexViewer = function () {
+    if (!BinVis.hexViewerInitialized) {
+
+        var i, j;
+
+        // create the hex viewer items
+
+        // offset values
+        for (i = 0; i < 32; i++) {
+            var elem = document.createElement("span");
+            elem.setAttribute("id", "offset-" + i);
+            elem.appendChild(document.createTextNode(convertToHex(i * 16)));
+
+            document.getElementById("hex-viewer-offset").appendChild(elem);
+
+
+            for (j = 0; j < 16; j++) {
+                // data values
+                elem = document.createElement("span");
+                elem.setAttribute("id", "data-" + (i * 16 + j));
+                elem.appendChild(document.createTextNode("00"));
+
+                document.getElementById("hex-viewer-hex").appendChild(elem);
+
+                // text values
+                elem = document.createElement("span");
+                elem.setAttribute("id", "text-" + (i * 16 + j));
+                elem.appendChild(document.createTextNode("."));
+
+                document.getElementById("hex-viewer-text").appendChild(elem);
+            }
+        }
+
+        BinVis.hexViewerInitialized = true;
+    }
+    else {
+        // Set everything to 00
+        for (i = 0; i < 32; i++) {
+            $("#offset-" + i).text(convertToHex(i * 16));
+
+            for (j = 0; j < 16; j++) {
+                // data values
+                $("#data-" + (i * 16 + j)).text("00");
+
+                // text values
+                $("#text-" + (i * 16 + j)).text(".");
+            }
+        }
+    }
+};
+
+BinVis.updateHexViewer = function (offset) {
+
+    // align to 4 bits
+    offset = (offset & 0xFFFFFFF0);
+		BinVis.hexViewerOffset = offset;
+		
+		if(FileBuffer.data) { // ensure data is loaded already
+			var i,j, off,val;
+			for (i = 0; i < 32; i++) {
+				off = offset + i *16;
+				$("#offset-" + i).text(convertToHex(off));
+				
+        for (j = 0; j < 16; j++) {
+					if(off+j < FileBuffer.data.length) {
+						val = FileBuffer.data[off + j];
+						
+						// data values
+						$("#data-" + (i * 16 + j)).text(convertToHex(val, 2));
+						// text values
+						$("#text-" + (i * 16 + j)).text(Converter.getPrintable(val));
+          }
+					else {
+						// data values
+						$("#data-" + (i * 16 + j)).text("  ");
+						// text values
+						$("#text-" + (i * 16 + j)).text(" ");
+					}
+				}
+      }
+		}
+};
+
+// highlights corresponding span 
+BinVis.highlightHex = function(offset) {
+	if(this.hexViewerHighlight > -1) {
+		$("#data-" + this.hexViewerHighlight).removeClass("hexHighlight");
+		$("#text-" + this.hexViewerHighlight).removeClass("hexHighlight");
+		this.hexViewerHighlight = -1;
+	}
+	
+	if(offset>=BinVis.hexViewerOffset && offset<BinVis.hexViewerOffset + 512) {
+		offset -= BinVis.hexViewerOffset;
+		this.hexViewerHighlight = offset;
+		$("#data-" + this.hexViewerHighlight).addClass("hexHighlight");
+		$("#text-" + this.hexViewerHighlight).addClass("hexHighlight");
+	}
+};
+
+
+// Helper functions
+
+function setStartingOffset(num) {
+    var i;
+    for (i = 0; i < 32; i++) {
+        document.getElementById("offset-" + i).textContent = convertToHex(num);
+        num += 16;
+    }
 }
+
+function setDataValue(offset, value) {
+    // offset is zero-based from base offset
+    if (offset < 0 || offset >= 512) return 0;
+
+    if (value < 0) value = 0;
+    if (value >= 256) value = 255;
+
+    document.getElementById("data-" + offset).textContent = convertToHex(value,2);
+    document.getElementById("text-" + offset).textContent = Converter.getPrintable(value);
+} 
+
+function convertToHex(num, length) {
+    if (length === undefined) length = 8;
+
+    var a = num.toString(16).toUpperCase();
+    while(a.length < length) 
+        a="0" + a;
+    return a;
+}
+

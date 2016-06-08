@@ -5,6 +5,7 @@
         <meta charset="utf-8" />
         <title>Test Page</title>
         <script src="js/jquery.js"></script>
+        <script src="js/Converter.js"></script>
         <script src="js/Globals.js"></script>
         <script src="js/ImageBuffer.js"></script>
         <script src="js/BinVis.js"></script>
@@ -156,8 +157,20 @@
             <div id="main-body">
                 <div id="context-menu"></div>
                 <div id="panel-div">
+                    <!-- Visual Panel -->
                     <div id="visual-panel-canvas">
                          <canvas id="main-canvas" width="512" height="512"></canvas>
+                    </div>
+
+                    <!-- Hex Viewer -->
+                    <div id="hex-viewer">
+                        <div id="hex-viewer-offset" class="offset columnar"></div>
+                        <div id="hex-viewer-hex" class="hex columnar display-window"></div>
+                        <div id="hex-viewer-text" class="text columnar display-window"></div>
+                        <div id="hex-viewer-scrollbar" class="scrollbar">
+                            <div id="scroll-up"></div>
+                            <div id="scroll-bottom"></div>
+                        </div>
                     </div>
                 </div>
             </div>

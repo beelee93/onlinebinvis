@@ -1,3 +1,9 @@
+* {
+    box-sizing:  border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
 body {
 }
 
@@ -28,23 +34,125 @@ div.hmenu {
     border: 1px solid black;
 }
 
+/* Container for Hex Viewer and Panels*/
 #panel-div {
     padding-left: 67px;
-    height:  600px;
     border: 1px solid black;
 }
 
+/* Bytemap Panel */
 #visual-panel-canvas {
-    background: black;
+    background: grey;
     width: 600px;
     height: 600px;
+    padding: 3px;
 }
 
+/* Hex viewer*/
+#hex-viewer {
+    margin-top: 5px;
+    min-height: 512px;
+    padding: 3px;
+    font-family: monospace;
+    font-size: 16px;
+    width:  800px;
+    position: relative;
+    border:  1px solid black;
+}
+
+#hex-viewer .columnar {
+    display: inline-block;
+    vertical-align: top;
+}
+
+#hex-viewer .offset {
+    width: 100px;
+    text-align: center;
+    border-right: 2px solid grey;
+}
+
+#hex-viewer .offset > span::after {
+    content: '\A';
+    white-space: pre;
+}
+
+
+/* -- Hex Viewer Hex Numbers view*/
+#hex-viewer .hex {
+    width: 360px;
+    border-right: 1px solid grey;
+}
+
+#hex-viewer .hex>span:nth-child(2n) {
+		color: #959595;
+}
+
+/* -- Hex Viewer Text View */
+#hex-viewer .text {
+    width:  200px;
+}
+
+/* ---- For every 16th span child */
+#hex-viewer .display-window>span:nth-child(16n)::after{
+    content: "\A";
+    white-space: pre;
+}
+
+#hex-viewer .display-window>span:nth-child(16n+8)::after {
+    content: " ";
+    white-space: pre;
+}
+
+#hex-viewer .hexHighlight {
+		background-color: #F000EA;
+		font-weight:bold;
+}
+
+/* -- Hex Viewer Scrollbar */
+#hex-viewer .scrollbar {
+    position: absolute;
+    background-color: #F0F0F0;
+    right: 0px;
+    top:  0px;
+    bottom:  0px;
+    width:  16px;
+}
+
+#hex-viewer #scroll-up {
+    height: 16px;
+}
+
+#hex-viewer #scroll-bottom {
+    height:  16px;
+    bottom: 0px;
+    position: absolute;
+    width: 16px;
+}
+
+#hex-viewer span {
+    padding: 1px 1px;
+}
+
+/* For large screens, place hex viewer to the side*/
+@media (min-width: 1200px) {
+    #hex-viewer {
+        display: inline-block;
+        vertical-align: top;
+        margin-top: 0px;
+    }
+
+    #visual-panel-canvas {
+        display: inline-block;
+    }
+}
+
+/* Main Canvas*/
 #main-canvas {
     width: 100%;
     height: 100%;
 }
 
+/* Buffer Container*/
 #buffer-container {
     display: none;
 }
