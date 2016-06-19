@@ -120,6 +120,14 @@ div.hmenu {
 
 #hex-viewer #scroll-up {
     height: 16px;
+		background: url("../img/arrowup.png");
+}
+#hex-viewer #scroll-up.enabled:hover {
+		background: url("../img/arrowup_hover.png");
+}
+
+#hex-viewer .disabled {
+		opacity: 0.2;
 }
 
 #hex-viewer #scroll-bottom {
@@ -127,6 +135,22 @@ div.hmenu {
     bottom: 0px;
     position: absolute;
     width: 16px;
+		background: url("../img/arrowdown.png");
+}
+#hex-viewer #scroll-bottom.enabled:hover {
+		background: url("../img/arrowdown_hover.png");
+}
+
+#hex-viewer #scroll-track {
+	position: absolute;
+	height: 20px;
+	width: 16px;
+	background-color: #D0D0D0;
+	top: 16px;
+}
+
+#hex-viewer #scroll-track:hover {
+	background-color: #A0A0A0;
 }
 
 #hex-viewer span {

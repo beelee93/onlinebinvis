@@ -280,8 +280,11 @@ BytemapPanel.prototype.onMouseMove = function (x, y) {
 BytemapPanel.prototype.onMouseDown = function (x, y) {
     this.onMouseMove(x, y);
 		
-		// invoke the Hex Viewer to display current offset
+		if(this.lastMouse[2] < 0 || this.lastMouse[2] > this.scanwidth) 
+			return 0;
 		
+		// invoke the Hex Viewer to display current offset
+
 		// let's align to 9 bits
 		var off = (this.lastMouse[4] & 0xFFFFFE00);
 		BinVis.updateHexViewer(off);

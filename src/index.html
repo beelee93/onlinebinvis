@@ -15,122 +15,7 @@
         <script src="js/DigraphPanel.js"></script>
         <script src="js/DotPlotPanel.js"></script>
         <script src="js/FileBuffer.js"></script>
-        <script>
-
-            function init() {
-                BinVis.initialize(); // initialize app
-
-                // event handler for file uploader
-                $("#upload-file").change(fileSelectedEvent);
-
-                // setup event handlers for offset configurator
-                $("#offset-slider").change(offset_slider_changed);
-
-                // event handler for keypresses
-                $("body").keypress(handle_keypresses);
-            }
-
-            // when a new file is selected
-            function fileSelectedEvent() {
-                console.log("File selected");
-
-                BinVis.loadFile($("#upload-file")[0].files[0]);
-                var o = $("#offset-slider")[0];
-                o.max = (BinVis.dataLength - 1).toString();
-                o.value = "0";
-                offset_slider_changed();
-            }
-
-            // when the button for upload is clicked
-            function uploadInvoke() {
-                document.getElementById("upload-file").click();
-            }
-
-            // when offset slider is changed
-            function offset_slider_changed() {
-                document.getElementById("offset-text").value = document.getElementById("offset-slider").value;
-                var a = document.getElementById("offset-slider").value;
-                var val = parseInt(a, 10);
-                BinVis.setDataOffset(val);
-            }
-
-            // handles keypresses globally
-            function handle_keypresses(evt) {
-
-                if (!FileBuffer.file || BinVis.fileLoadingPhase != Globals.FILE_LOADED)
-                    return 0;
-
-                var handled = false;
-                switch (evt.target.id) {
-
-                    case "offset-text": // offset textbox
-                        if (evt.keyCode == 13) // ENTER
-                        {
-                            var a = document.getElementById("offset-text").value;
-                            var val = parseInt(a, 10);
-                            if (val == NaN) {
-                                document.getElementById("offset-text").value = document.getElementById("offset-slider").value;
-                            }
-                            else {
-                                if (val < 0) val = 0;
-                                if (val >= BinVis.dataLength) val = BinVis.dataLength - 1;
-                                document.getElementById("offset-slider").value = val.toString();
-                                offset_slider_changed();
-                            }
-                        }
-                        handled = true;
-                        break;
-
-                    case "offset-slider": // offset slider
-                        offset_slider_changed();
-                        handled = true;
-                        break;
-                }
-
-                if (!handled) {
-                    // keypress directed to document body
-
-                    var o = $("#offset-slider")[0];
-                    var curVal = parseInt(o.value);
-                    var largeOff = Math.ceil(0.005 * BinVis.dataLength);
-                    
-                    switch (evt.keyCode) {
-                        case 37: // Arrow left
-                            evt.preventDefault();
-                            break;
-                        case 38: // Arrow up
-                            curVal -= (evt.ctrlKey ? largeOff : 1);
-                            evt.preventDefault();
-                            break;
-
-                        case 39: // Arrow right
-                            evt.preventDefault();
-                            break;
-                        case 40: // Arrow down
-                            curVal += (evt.ctrlKey ? largeOff : 1);
-                            evt.preventDefault();
-                            break;
-
-                        default:
-                            // pass key args to user interface
-                            if (UserInterface.onkeypress)
-                                UserInterface.onkeypress(evt);
-                            break;
-                    }
-
-                    // clamp
-                    if (curVal < 0) curVal = 0;
-                    if (curVal > BinVis.dataLength - 1) curVal = BinVis.dataLength - 1;
-
-                    if (curVal.toString() != o.value) {
-                        o.value = curVal.toString();
-                        offset_slider_changed();
-                    }
-                }
-
-            }
-
-        </script>
+				<script src="js/Main.js"></script>
 
         <link type="text/css" rel="stylesheet" href="css/main.css" />
     </head>
@@ -168,8 +53,9 @@
                         <div id="hex-viewer-hex" class="hex columnar display-window"></div>
                         <div id="hex-viewer-text" class="text columnar display-window"></div>
                         <div id="hex-viewer-scrollbar" class="scrollbar">
-                            <div id="scroll-up"></div>
-                            <div id="scroll-bottom"></div>
+                            <div id="scroll-up" class="enabled"></div>
+														<div id="scroll-track"></div>
+                            <div id="scroll-bottom" class="enabled"></div>
                         </div>
                     </div>
                 </div>

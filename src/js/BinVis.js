@@ -75,6 +75,9 @@ BinVis.loadFileSuccessHandler = function () {
 
     // Hex viewer mechanics
 		BinVis.updateHexViewer(0);
+		
+		// ScrollBar
+		ScrollBar.updateDimension();
 }
 
 ///////////////////////////////////////////////////////////////////
