@@ -32,6 +32,13 @@ BytemapPanel.prototype.setScanWidth = function (newScanWidth) {
     this.redraw = 1;
 }
 
+BytemapPanel.prototype.setPixelFormat = function (newpf) {
+		this.pixelFormat = newpf % 6;
+		this.setPixelFormatText();
+		this.pixelFormatAlpha = 2;
+		this.updateData();
+};
+
 BytemapPanel.prototype.update = function (diffTime) {
     if (this.pixelFormatAlpha > 0) {
         this.pixelFormatAlpha -= diffTime;
@@ -219,13 +226,8 @@ BytemapPanel.prototype.render = function (ctx, diffTime) {
 BytemapPanel.prototype.onkeypress = function (evt) {
     switch (evt.key) {
         case 'p': // P - cycle pixel formats
-            this.pixelFormat++;
-            if (this.pixelFormat >= Globals.SupportedPixelFormatCount)
-                this.pixelFormat -= Globals.SupportedPixelFormatCount;
-
-            this.setPixelFormatText();
-            this.pixelFormatAlpha = 2;
-            this.updateData();
+            this.setPixelFormat(this.pixelFormat+1);
+						$("#select-pixelformat")[0].selectedIndex = this.pixelFormat;
             break;
 
         case 'a':
@@ -235,6 +237,10 @@ BytemapPanel.prototype.onkeypress = function (evt) {
                 this.setScanWidth(this.scanwidth - 1);
             evt.preventDefault();
             this.onMouseMove(this.lastMouse[0], this.lastMouse[1]);
+						
+						$("#scanwidth-slider")[0].value=this.scanwidth.toString();
+						$("#scanwidth-text")[0].value=this.scanwidth.toString();
+						
             break;
         case 'd':
             if (evt.ctrlKey)
@@ -243,6 +249,8 @@ BytemapPanel.prototype.onkeypress = function (evt) {
                 this.setScanWidth(this.scanwidth + 1);
             evt.preventDefault();
             this.onMouseMove(this.lastMouse[0], this.lastMouse[1]);
+						$("#scanwidth-slider")[0].value=this.scanwidth.toString();
+						$("#scanwidth-text")[0].value=this.scanwidth.toString();
             break;
     }
 }
@@ -274,7 +282,7 @@ BytemapPanel.prototype.onMouseMove = function (x, y) {
             break;
     }
 
-    this.lastMouse[4] = (this.lastMouse[3] * this.scanwidth + this.lastMouse[2]) * mult; + BinVis.dataOffset;
+    this.lastMouse[4] = (this.lastMouse[3] * this.scanwidth + this.lastMouse[2]) * mult + BinVis.dataOffset;
 };
 
 BytemapPanel.prototype.onMouseDown = function (x, y) {
@@ -288,6 +296,9 @@ BytemapPanel.prototype.onMouseDown = function (x, y) {
 		// let's align to 9 bits
 		var off = (this.lastMouse[4] & 0xFFFFFE00);
 		BinVis.updateHexViewer(off);
+		
+		// update track position
+		ScrollBar.updateTrackPosition();
 		
 		// now highlight the corresponding offset
 		BinVis.highlightHex(this.lastMouse[4]);

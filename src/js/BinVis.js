@@ -78,6 +78,16 @@ BinVis.loadFileSuccessHandler = function () {
 		
 		// ScrollBar
 		ScrollBar.updateDimension();
+		
+		// Default values
+				
+		if(BinVis.panelBytemap) {
+			BinVis.panelBytemap.setScanWidth(512);
+			BinVis.panelBytemap.setPixelFormat(0);
+			$("#scanwidth-slider")[0].value="512";
+			$("#scanwidth-text")[0].value="512";
+			$("#select-pixelformat")[0].selectedId="0";
+		}
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -109,6 +119,7 @@ BinVis.resetAllPanels = function () {
         this.panels[i].renderEnabled = false;
         this.panels[i].invokeReset();
     }
+
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -168,6 +179,18 @@ BinVis.showPanel = function (index) {
     // place this panel into UI to receive events
     UserInterface.panels = [];
     UserInterface.panels.push(this.selectedPanel);
+		
+		// show the proper menubar
+		$(".panel-menu").css("display","none");
+		switch(this.selectedPanel.name) {
+			case "Bytemap":
+				$("#menu-bytemap").show(1);
+				break;
+				
+			default:
+			  $(".panel-menu").hide(1);
+				break;
+		}
 };
 
 ///////////////////////////////////////////////////////////////////

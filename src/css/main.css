@@ -16,10 +16,29 @@ body {
     padding: 3px;
 }
 
+/* Header menu */
 div.hmenu {
     height: 38px;
     padding: 3px;
     border: 1px solid black;
+}
+
+div.hmenu span {
+	line-height:32px;
+	vertical-align: middle;
+}
+
+div.hmenu input {
+	vertical-align:middle;
+	margin-left: -2px;
+}
+
+div.hmenu select {
+	vertical-align:middle;
+}
+
+div.hmenu .panel-menu {
+	display:none;
 }
 
 #main-body {
@@ -187,4 +206,5 @@ div.hmenu {
 
 img.button {
     height: 32px;
+		vertical-align:middle;
 }

@@ -21,22 +21,34 @@
     </head>
     <body onload="init()">
         <div id="main-container">
-            <div id="header"><h4>Header</h4></div>
+            <div id="header"><h4>Online Binary Visualisation Tool</h4></div>
             <div id="top-menu" class="hmenu">
 
                 <!-- Upload button -->
                 <a onclick="uploadInvoke()"><img class="button" src="img/uploadicon.png" alt="Upload File" /></a>
                 
                 <!-- Offset configuration -->
-                <span id="offset-slider-container" style="display:none">
+                <span id="offset-slider-container" style="display:inline">
                     <span>Offset: </span>
-                    <input type="range" id="offset-slider" min="0" max="100" value="0"/>
+                    <input type="range" style="width:300px" id="offset-slider" min="0" max="100" value="0"/>
                     <input type="text" id="offset-text" value="0"/>
                  </span>
             </div>
             <div id="top-menu-2" class="hmenu">
-                <div id="menu-bytemap">
-                    
+                <div id="menu-bytemap" class="panel-menu">
+                    <span>Scanwidth: </span>
+										<input type="range" style="width:150px" id="scanwidth-slider" min="1" max="512" value="512"/>
+                    <input type="text" style="width:40px" id="scanwidth-text" value="512"/>
+										
+										<span> | Pixel Format: </span>
+										<select id="select-pixelformat">
+											<option>8 bpp</option>
+											<option>16 bpp</option>
+											<option>24 bpp RGB</option>
+											<option>24 bpp BGR</option>
+											<option>32 bpp ARGB</option>
+											<option>32 bpp RGBA</option>
+										</select>
                 </div>
             </div>
             <div id="main-body">

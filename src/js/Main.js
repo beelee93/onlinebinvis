@@ -22,6 +22,10 @@ function init() {
 						 
 		document.getElementById("hex-viewer").onwheel = ScrollBar.handle_scroll;
 		
+		// BYTEMAP MENU
+		$("#scanwidth-slider").change(scanwidth_slider_changed);
+		$("#select-pixelformat").change(pixelformat_changed);
+		
 		// register events for ScrollBar
 		ScrollBar.registerEvents();
 }
@@ -50,6 +54,39 @@ function offset_slider_changed() {
 		BinVis.setDataOffset(val);
 }
 
+function scanwidth_slider_changed() {
+	  document.getElementById("scanwidth-text").value = document.getElementById("scanwidth-slider").value;
+		var a = document.getElementById("scanwidth-slider").value;
+		var val = parseInt(a, 10);
+		
+		if(BinVis.panelBytemap)
+			BinVis.panelBytemap.setScanWidth(val);
+}
+
+function pixelformat_changed() {
+	if(BinVis.panelBytemap)
+	{
+		var k = parseInt($("#select-pixelformat")[0].selectedIndex,10);
+		BinVis.panelBytemap.setPixelFormat(k);
+	}
+}
+
+function updateSliderFromText(name, small, large, callback) {
+	var id = name+"-text";
+	var id2 = name+"-slider";
+	var a = document.getElementById(id).value;
+	var val = parseInt(a, 10);
+	if (val == NaN) {
+			document.getElementById(id).value = document.getElementById(id2).value;
+	}
+	else {
+			if (val < 0) val = 0;
+			if (val > large) val = large;
+			document.getElementById(id2).value = val.toString();
+			callback();
+  }
+}
+
 // handles keypresses globally
 function handle_keypresses(evt) {
 
@@ -62,21 +99,18 @@ function handle_keypresses(evt) {
 				case "offset-text": // offset textbox
 						if (evt.keyCode == 13) // ENTER
 						{
-								var a = document.getElementById("offset-text").value;
-								var val = parseInt(a, 10);
-								if (val == NaN) {
-										document.getElementById("offset-text").value = document.getElementById("offset-slider").value;
-								}
-								else {
-										if (val < 0) val = 0;
-										if (val >= BinVis.dataLength) val = BinVis.dataLength - 1;
-										document.getElementById("offset-slider").value = val.toString();
-										offset_slider_changed();
-								}
+								updateSliderFromText("offset", 0, BinVis.dataLength-1, offset_slider_changed);
 						}
 						handled = true;
 						break;
 
+				case "scanwidth-text":
+						if (evt.keyCode == 13) // ENTER
+						{
+								updateSliderFromText("scanwidth", 0, 512, scanwidth_slider_changed);
+						}
+						handled = true;
+						break;
 				case "offset-slider": // offset slider
 						offset_slider_changed();
 						handled = true;
@@ -270,6 +304,8 @@ ScrollBar.onScrollChanged = function() {
 	// TODO: Need to incorporate the increment here!!
 	var offset = Math.floor(curScroll * ScrollBar.increment * 16);
 	BinVis.updateHexViewer(offset);
+	
+	BinVis.highlightHex(-1);
 };
 
 
@@ -284,9 +320,19 @@ ScrollBar.moveScrollTrack = function(mouse_y) {
 	var prevScrollTop = ScrollBar.jscrollTrack.cssInt("top");
 	
 	mouse_y -= ScrollBar.offsetY;
-	if(mouse_y < origTop) mouse_y = origTop;
-	else if(mouse_y > origTop + ScrollBar.containerHeight-ScrollBar.trackHeight) 
+	if(mouse_y < origTop) {
+		mouse_y = origTop;
+		ScrollBar.setButtonEnabled(ScrollBar.SCROLL_UP, false);
+		ScrollBar.setButtonEnabled(ScrollBar.SCROLL_DOWN, true);
+	}
+	else if(mouse_y > origTop + ScrollBar.containerHeight-ScrollBar.trackHeight) {
 		mouse_y = origTop + ScrollBar.containerHeight-ScrollBar.trackHeight;
+		ScrollBar.setButtonEnabled(ScrollBar.SCROLL_UP, true);
+		ScrollBar.setButtonEnabled(ScrollBar.SCROLL_DOWN, false);
+	} else {
+		ScrollBar.setButtonEnabled(ScrollBar.SCROLL_UP, true);
+		ScrollBar.setButtonEnabled(ScrollBar.SCROLL_DOWN, true);
+	}
 	
 	var currScrollTop = mouse_y-origTop+16;
 	o.style.top = (mouse_y-origTop+16) + "px";
@@ -346,4 +392,24 @@ ScrollBar.scrollByAmount = function(amt) {
 	
 	ScrollBar.scrollTrack.style.top = newScroll + "px";
 	ScrollBar.onScrollChanged();
+};
+
+// update the tracks location based on the first line's offset
+ScrollBar.updateTrackPosition = function() {
+	var offset = parseInt($("#offset-0").text(),16);
+	var top = Math.floor(offset / ScrollBar.increment / 16);
+	if(top<=0) {
+		top = 0;
+		ScrollBar.setButtonEnabled(ScrollBar.SCROLL_UP, false);
+		ScrollBar.setButtonEnabled(ScrollBar.SCROLL_DOWN, true);
+	}
+	else if(top + ScrollBar.trackHeight > ScrollBar.containerHeight) {
+		top = ScrollBar.containerHeight - ScrollBar.trackHeight;
+		ScrollBar.setButtonEnabled(ScrollBar.SCROLL_UP, true);
+		ScrollBar.setButtonEnabled(ScrollBar.SCROLL_DOWN, false);
+	} else {
+		ScrollBar.setButtonEnabled(ScrollBar.SCROLL_UP, true);
+		ScrollBar.setButtonEnabled(ScrollBar.SCROLL_DOWN, true);
+	}
+	ScrollBar.scrollTrack.style.top = (top + 16) + "px";
 };
