@@ -16,6 +16,10 @@ function DigraphPanel(parent) {
 
     this.contrastValue = 170;
     this.redraw=1;
+		
+		this.lastMouse = [0,0];
+		
+		this.drawMouseInfo = false;
 }
 
 // Inheritance
@@ -81,6 +85,28 @@ DigraphPanel.prototype.render = function(ctx, diffTime) {
     
     ctx.drawImage(this.imageBuffer.getCanvas(), 0,0,this.size.width, 
         this.size.height);
+
+		if(this.drawMouseInfo) {
+			var offX = 20, offY = 32;
+
+			if (this.lastMouse[0] < 128) ctx.textAlign = "left";
+			else { ctx.textAlign = "right"; offX = 0; }
+			if (this.lastMouse[1] < 128) ctx.textBaseLine = "top";
+			else { ctx.textBaseLine = "bottom"; offY = -2; }
+
+			offX = this.lastMouse[0] / 256 * this.size.width + offX;
+			offY = this.lastMouse[1] / 256 * this.size.height + offY;
+
+			var txt = this.lastMouse[0].toString(16) + "," + this.lastMouse[1].toString(16);
+
+			ctx.font = "14px monospace bold";
+			ctx.strokeStyle = "black";
+			ctx.strokeText(txt, offX, offY);
+
+			ctx.fillStyle = "white";
+			ctx.fillText(txt, offX, offY);
+    }
+
 };
 
 
@@ -102,3 +128,9 @@ DigraphPanel.prototype.decrementByte = function(x,y) {
         this.digraph[k] -= 1;
     return this.digraph[k];
 }
+
+
+DigraphPanel.prototype.onMouseMove = function (x, y) {
+    this.lastMouse[0] = Math.floor(x / UserInterface.canvas.clientWidth * 256);
+    this.lastMouse[1] = Math.floor(y / UserInterface.canvas.clientHeight * 256);
+};

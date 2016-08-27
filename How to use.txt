@@ -1,0 +1,31 @@
+=======================================
+GENERAL
+=======================================
+
+1. Run index.html on Mozilla Firefox
+	-May not work very well on other browsers for now
+
+2. Upload a file
+
+3. Once uploaded, the bytemap is displayed. 
+
+4. Use the up/down arrow keys to move the file-offset by
+   -1/+1. Hold down CTRL to increase the offset increments.
+
+=======================================
+BYTEMAP-SPECIFIC CONTROLS
+=======================================
+
+1. Clicking anywhere on the bytemap will highlight the 
+   corresponding byte value in the hex-viewer.
+
+2. Context-sensitive controls will be present to change 
+   the scanwidth, pixel format of the display and to
+   classify the byte values.
+
+3. Shortcuts:
+   P   - Cycle through the different pixel formats
+   A/D - Shrink or grow the scanwidth. Hold CTRL
+         to speed up.
+
+ 

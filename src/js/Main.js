@@ -25,6 +25,8 @@ function init() {
 		// BYTEMAP MENU
 		$("#scanwidth-slider").change(scanwidth_slider_changed);
 		$("#select-pixelformat").change(pixelformat_changed);
+		$("#check-classify").change(classify_changed)
+		
 		
 		// register events for ScrollBar
 		ScrollBar.registerEvents();
@@ -63,11 +65,19 @@ function scanwidth_slider_changed() {
 			BinVis.panelBytemap.setScanWidth(val);
 }
 
+// when pixel format for bytemap is changed
 function pixelformat_changed() {
 	if(BinVis.panelBytemap)
 	{
 		var k = parseInt($("#select-pixelformat")[0].selectedIndex,10);
 		BinVis.panelBytemap.setPixelFormat(k);
+
+	}
+}
+
+function classify_changed() {
+	if(BinVis.panelBytemap) {
+		BinVis.panelBytemap.setClassifyBytes($("#check-classify")[0].checked);
 	}
 }
 
@@ -157,6 +167,11 @@ function handle_keypresses(evt) {
 						offset_slider_changed();
 				}
 		}
+}
+
+// switch the plots
+function showPlot(arg) {
+	BinVis.showPanel(arg);
 }
 
 function handle_mouseup(evt) {

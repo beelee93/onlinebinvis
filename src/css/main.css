@@ -12,7 +12,6 @@ body {
 }
 
 #header {
-    border: 1px solid black;
     padding: 3px;
 }
 
@@ -20,7 +19,9 @@ body {
 div.hmenu {
     height: 38px;
     padding: 3px;
-    border: 1px solid black;
+		border: 1px solid black;
+		background-color: #F0F0F0;
+		margin-top: 1px;
 }
 
 div.hmenu span {
@@ -43,20 +44,28 @@ div.hmenu .panel-menu {
 
 #main-body {
     padding: 3px;
-    border: 1px solid black;
 }
 
-#context-menu {
-    float: left;
-    width:  64px;
-    height: 600px;
-    border: 1px solid black;
+#plot-menu-container {
+	float: left;
+  width:  64px;
+  height: 600px;
+	border: 1px solid black;
+	background-color: #F0F0F0;
+}
+
+#plot-menu {
+  text-align: center;
+	display:none;
+}
+
+#plot-menu img:hover {
+	border: 1px solid black;
 }
 
 /* Container for Hex Viewer and Panels*/
 #panel-div {
     padding-left: 67px;
-    border: 1px solid black;
 }
 
 /* Bytemap Panel */
@@ -65,6 +74,7 @@ div.hmenu .panel-menu {
     width: 600px;
     height: 600px;
     padding: 3px;
+		cursor: crosshair;
 }
 
 /* Hex viewer*/
@@ -123,7 +133,8 @@ div.hmenu .panel-menu {
 }
 
 #hex-viewer .hexHighlight {
-		background-color: #F000EA;
+		border: 1px dashed black;
+		background-color: #B2FFFF;
 		font-weight:bold;
 }
 

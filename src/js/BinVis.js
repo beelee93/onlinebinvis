@@ -28,6 +28,10 @@ BinVis.hexViewerOffset = -1;
 BinVis.IMG_BUFFER_256 = {};
 BinVis.IMG_BUFFER_512 = {};
 
+// countdown to update hex viewer
+BinVis.hexCountdown = 0;
+BinVis.isCountingDown = false;
+
 ///////////////////////////////////////////////////////////////////
 // Initializes the binvis app
 // id: main-canvas = canvas to draw the UI on
@@ -71,8 +75,9 @@ BinVis.loadFileSuccessHandler = function () {
     console.log("FILE FINISHED READING!");
     BinVis.initializePanels();
 
-    jQuery("#offset-slider-container").css("display", "inline");
-
+    $("#offset-slider-container").css("display", "inline");
+		$("#plot-menu").css("display","block");
+		
     // Hex viewer mechanics
 		BinVis.updateHexViewer(0);
 		
@@ -97,7 +102,8 @@ BinVis.loadFileErrorHandler = function () {
     // error reading file
     console.log("ERROR READING!");
     BinVis.fileLoadingPhase = Globals.FILE_NOFILE;
-    jQuery("#offset-slider-container").css("display", "none");
+    $("#offset-slider-container").css("display", "none");
+		$("#plot-menu").css("display","none");
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -107,7 +113,36 @@ BinVis.setDataOffset = function (newOffset) {
     if (newOffset < this.dataLength && newOffset >= 0) {
         this.dataOffset = newOffset;
         this.onOffsetChanged();
+				
+				// reset countdown to update hex viewer
+				this.countDownToUpdate();
     }
+}
+
+///////////////////////////////////////////////////////////////////
+// Countdown to update hex viewer
+///////////////////////////////////////////////////////////////////
+BinVis.countDownToUpdate = function() {
+	this.hexCountdown = 2;
+	if(!this.isCountingDown) {
+		this.isCountingDown = true;
+		window.setTimeout(BinVis.countdownFunc, 250);
+	}
+}
+
+BinVis.countdownFunc = function() {
+	if(BinVis.hexCountdown > 0) {
+		BinVis.hexCountdown --;
+		if(BinVis.hexCountdown <= 0) {
+			// invoke hex update
+			BinVis.updateHexViewer(BinVis.dataOffset);
+			BinVis.highlightHex(-1);
+			BinVis.isCountingDown = false;
+		}
+		else {
+			window.setTimeout(BinVis.countdownFunc, 250);
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -175,6 +210,7 @@ BinVis.showPanel = function (index) {
     this.selectedPanel = this.panels[index];
     this.selectedPanel.renderEnabled = true;
     this.selectedPanel.updateData();
+		this.selectedPanel.redraw=1; // force render
 
     // place this panel into UI to receive events
     UserInterface.panels = [];

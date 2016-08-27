@@ -21,14 +21,14 @@
     </head>
     <body onload="init()">
         <div id="main-container">
-            <div id="header"><h4>Online Binary Visualisation Tool</h4></div>
+            <div id="header"><span style="font-weight: bold">Online Binary Visualisation Tool</span></div>
             <div id="top-menu" class="hmenu">
 
                 <!-- Upload button -->
-                <a onclick="uploadInvoke()"><img class="button" src="img/uploadicon.png" alt="Upload File" /></a>
+                <a title="Upload File" onclick="uploadInvoke()"><img class="button" src="img/uploadicon.png" alt="Upload File" /></a>
                 
                 <!-- Offset configuration -->
-                <span id="offset-slider-container" style="display:inline">
+                <span id="offset-slider-container" style="display:none">
                     <span>Offset: </span>
                     <input type="range" style="width:300px" id="offset-slider" min="0" max="100" value="0"/>
                     <input type="text" id="offset-text" value="0"/>
@@ -49,10 +49,21 @@
 											<option>32 bpp ARGB</option>
 											<option>32 bpp RGBA</option>
 										</select>
+										<span class="byte-class-check"> | </span>
+										<input id="check-classify" class="byte-class-check" type="checkbox" />
+										<span class="byte-class-check">Classify Bytes</span>
                 </div>
             </div>
             <div id="main-body">
-                <div id="context-menu"></div>
+								<div id="plot-menu-container">
+									<div id="plot-menu">
+										<p>PLOT TYPES</p>
+										<p>------</p>
+										<a onclick="showPlot(0)" title="Byteplot"><img src="img/icon_byteplot.png" alt="Byteplot"></a>
+										<a onclick="showPlot(1)" title="Digraph"><img src="img/icon_digraph.png" alt="Digraph"></a>
+										<a onclick="showPlot(2)" title="Kaminsky Dotplot"><img src="img/icon_kaminsky.png" alt="Kaminsky"></a>
+									</div>
+								</div>
                 <div id="panel-div">
                     <!-- Visual Panel -->
                     <div id="visual-panel-canvas">

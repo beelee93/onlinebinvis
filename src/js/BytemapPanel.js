@@ -15,10 +15,12 @@ function BytemapPanel(parent) {
     this.pixelFormat = Globals.PF8BPP;
     this.pixelFormatAlpha = 0;
     this.pixelFormatText = "8 bpp";
-
+		this.classifyBytes = false;
+		
     this.lastMouse = [0, 0, 0, 0,0]; // cx,cy,mappedx,mappedy,offset
 
     this.redraw = 1;
+		this.drawMouseInfo = false;
 }
 
 // Inheritance
@@ -37,7 +39,19 @@ BytemapPanel.prototype.setPixelFormat = function (newpf) {
 		this.setPixelFormatText();
 		this.pixelFormatAlpha = 2;
 		this.updateData();
+			
+		if(this.pixelFormat==0) { // 8BPP
+			$(".byte-class-check").css("display","inline");
+			$("#check-classify")[0].checked = this.classifyBytes;
+		} else {
+			$(".byte-class-check").css("display","none");
+		}
 };
+
+BytemapPanel.prototype.setClassifyBytes = function(classify) {
+	this.classifyBytes = classify;
+	this.updateData();
+}
 
 BytemapPanel.prototype.update = function (diffTime) {
     if (this.pixelFormatAlpha > 0) {
@@ -50,6 +64,7 @@ BytemapPanel.prototype.updateData = function () {
     this.imageBuffer.clearBuffer();
     if (FileBuffer.data) {
         var i, x, y, temp, centering;
+				var r,g,b;
         var fb = FileBuffer.data;
         var stop = false;
 
@@ -63,7 +78,22 @@ BytemapPanel.prototype.updateData = function () {
                             stop = true;
                             break;
                         }
-                        this.imageBuffer.setPixel(centering + x, y, 0, fb[BinVis.dataOffset + i], 0);
+												
+												if(this.classifyBytes) {
+													temp = fb[BinVis.dataOffset + i];
+													if(temp == 0) this.imageBuffer.setPixel(centering + x, y, 0, 0, 0); // NUL byte
+													else if(temp == 255) this.imageBuffer.setPixel(centering + x, y, 255,255,255); // 0xFF byte
+													else {
+														if (temp >=32 && temp < 128) { // ASCII range
+															this.imageBuffer.setPixel(centering + x, y, 0,0,128 + (temp-32) * 128 / 95);
+														} else { // Any other bytes
+															this.imageBuffer.setPixel(centering + x, y, temp,0,0);
+														}
+													}
+														
+												}else {
+													 this.imageBuffer.setPixel(centering + x, y, 0, fb[BinVis.dataOffset + i], 0);
+												}  
                     }
                 }
                 break;
@@ -184,7 +214,7 @@ BytemapPanel.prototype.render = function (ctx, diffTime) {
     ctx.drawImage(this.imageBuffer.getCanvas(), 0, 0);
 
     // draw the mouse position - offset indicator
-    if (this.lastMouse[2] >= 0 && this.lastMouse[2] <= (this.size.width + this.scanwidth) / 2) {
+    if (this.drawMouseInfo && this.lastMouse[2] >= 0 && this.lastMouse[2] <= (this.size.width + this.scanwidth) / 2) {
 
         // TODO: Make this text look clearer!!
         var offX = 20, offY = 32;
